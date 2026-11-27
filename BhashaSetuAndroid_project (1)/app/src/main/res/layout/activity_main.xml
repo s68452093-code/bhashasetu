@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F7"
+    android:padding="12dp">
+
+    <!-- Main Navigation Tabs -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="12dp">
+        
+        <Button
+            android:id="@+id/btn_sign_to_text"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Sign -> Text"
+            android:backgroundTint="#3F51B5"
+            android:textColor="#FFFFFF"
+            android:layout_marginEnd="6dp" />
+
+        <Button
+            android:id="@+id/btn_text_to_sign"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Text -> Sign"
+            android:backgroundTint="#E0E0E0"
+            android:textColor="#333333"
+            android:layout_marginStart="6dp" />
+    </LinearLayout>
+
+    <!-- WORKFLOW 1: Sign to Text Layout -->
+    <LinearLayout
+        android:id="@+id/layout_sign_to_text"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Camera preview with card wrapper -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="12dp">
+            
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" 
+                android:background="#000000">
+                
+                <androidx.camera.view.PreviewView
+                    android:id="@+id/view_finder"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                
+                <TextView
+                    android:id="@+id/tv_connection_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Connected to Laptop Server"
+                    android:textColor="#00FF00"
+                    android:background="#80000000"
+                    android:padding="8dp"
+                    android:layout_gravity="top|end"/>
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Words only toggle layout -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+            
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Words Only Recognition"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:textSize="16sp"/>
+            
+            <ToggleButton
+                android:id="@+id/toggle_words_only"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:textOn="ON"
+                android:textOff="OFF"
+                android:checked="false"/>
+        </LinearLayout>
+
+        <!-- Prediction confidence display -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Detected: "
+                android:textSize="18sp"/>
+            
+            <TextView
+                android:id="@+id/tv_prediction_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Looking for hands..."
+                android:textSize="18sp"
+                android:textColor="#FF5722"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Sentence builder and speech action -->
+        <EditText
+            android:id="@+id/et_sentence"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Recognized sentence will appear here..."
+            android:minLines="2"
+            android:gravity="top"
+            android:background="#FFFFFF"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+            <Button
+                android:id="@+id/btn_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear"
+                android:backgroundTint="#757575"
+                android:layout_marginEnd="8dp"/>
+            
+            <Button
+                android:id="@+id/btn_speak"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Speak Sentence"
+                android:backgroundTint="#4CAF50"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- WORKFLOW 2: Text to Sign Layout (Hidden by default) -->
+    <LinearLayout
+        android:id="@+id/layout_text_to_sign"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Type or select a word to play ISL Sign Animation:"
+            android:textSize="15sp"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+            
+            <EditText
+                android:id="@+id/et_search_sign"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="Type e.g., HELLO, WATER..."
+                android:singleLine="true"/>
+            
+            <Button
+                android:id="@+id/btn_play_sign"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Play"/>
+        </LinearLayout>
+
+        <!-- Embedded WebView for realistic avatar playback -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+            
+            <WebView
+                android:id="@+id/avatar_webview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+</LinearLayout>
