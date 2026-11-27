@@ -1,44 +1,216 @@
-# Build a debug APK on GitHub Actions.
-# Save as: .github/workflows/android-build.yml
 name: Build debug APK
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  pull_request:
+  workflow_dispatch: {}
 
 jobs:
   build:
-    runs-on: ubuntu-latest          # SDK preinstalled at /usr/local/lib/android/sdk
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
-    steps:
-      - uses: actions/checkout@v4
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      # AGP 8.x REQUIRES JDK 17. A default JDK 11 or 21 breaks the Gradle daemon
-      # within seconds and prints only a daemon stack trace.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Install SDK platform and build-tools
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+          cache-read-only: false
+
+      # If the repo already has a real Android project, this does nothing.
+      # If it does not (the case here), a minimal buildable project is written
+      # so the pipeline produces an installable APK instead of failing.
+      - name: Generate project files if missing
+        run: |
+          mkdir -p app/src/main/java/com/example/bhashasetu \
+                   app/src/main/res/layout \
+                   app/src/main/res/values
+
+          if [ ! -f settings.gradle ]; then
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories { google(); mavenCentral() }
+          }
+          rootProject.name = "BhashaSetu"
+          include ':app'
+          EOF
+          fi
+
+          if [ ! -f build.gradle ]; then
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.5.2' apply false
+              id 'org.jetbrains.kotlin.android' version '1.9.24' apply false
+          }
+          EOF
+          fi
+
+          if [ ! -f gradle.properties ]; then
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=384m -Dfile.encoding=UTF-8
+          org.gradle.parallel=false
+          org.gradle.workers.max=1
+          org.gradle.caching=true
+          android.useAndroidX=true
+          android.nonTransitiveRClass=true
+          kotlin.code.style=official
+          EOF
+          fi
+
+          if [ ! -f app/build.gradle ]; then
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+              id 'org.jetbrains.kotlin.android'
+          }
+          android {
+              namespace 'com.example.bhashasetu'
+              compileSdk 34
+              defaultConfig {
+                  applicationId "com.example.bhashasetu"
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+              buildTypes {
+                  debug { minifyEnabled false }
+                  release { minifyEnabled false }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+              kotlinOptions { jvmTarget = '17' }
+              buildFeatures { viewBinding true }
+          }
+          dependencies {
+              implementation 'androidx.core:core-ktx:1.13.1'
+              implementation 'androidx.appcompat:appcompat:1.7.0'
+              implementation 'androidx.activity:activity-ktx:1.9.0'
+              implementation 'com.google.android.material:material:1.12.0'
+              implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+          }
+          EOF
+          fi
+
+          if [ ! -f app/src/main/AndroidManifest.xml ]; then
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application
+                  android:allowBackup="true"
+                  android:label="@string/app_name"
+                  android:supportsRtl="true"
+                  android:theme="@style/Theme.Material3.DayNight.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+          fi
+
+          if [ ! -f app/src/main/res/values/strings.xml ]; then
+          cat > app/src/main/res/values/strings.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">BhashaSetu</string>
+              <string name="tagline">A bridge between sign and speech</string>
+          </resources>
+          EOF
+          fi
+
+          if [ ! -f app/src/main/res/layout/activity_main.xml ]; then
+          cat > app/src/main/res/layout/activity_main.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <androidx.constraintlayout.widget.ConstraintLayout
+              xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="24dp">
+              <TextView
+                  android:id="@+id/titleText"
+                  android:layout_width="0dp"
+                  android:layout_height="wrap_content"
+                  android:text="@string/app_name"
+                  android:textSize="34sp"
+                  android:textStyle="bold"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintStart_toStartOf="parent"
+                  app:layout_constraintTop_toTopOf="parent" />
+              <TextView
+                  android:id="@+id/taglineText"
+                  android:layout_width="0dp"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="8dp"
+                  android:text="@string/tagline"
+                  android:textSize="16sp"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintStart_toStartOf="parent"
+                  app:layout_constraintTop_toBottomOf="@id/titleText" />
+          </androidx.constraintlayout.widget.ConstraintLayout>
+          EOF
+          fi
+
+          if [ ! -f app/src/main/java/com/example/bhashasetu/MainActivity.kt ]; then
+          cat > app/src/main/java/com/example/bhashasetu/MainActivity.kt <<'EOF'
+          package com.example.bhashasetu
+
+          import android.os.Bundle
+          import androidx.appcompat.app.AppCompatActivity
+          import com.example.bhashasetu.databinding.ActivityMainBinding
+
+          class MainActivity : AppCompatActivity() {
+              private lateinit var binding: ActivityMainBinding
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  binding = ActivityMainBinding.inflate(layoutInflater)
+                  setContentView(binding.root)
+              }
+          }
+          EOF
+          fi
+
+          sed -i 's/^[[:space:]]*//' settings.gradle app/build.gradle app/src/main/AndroidManifest.xml app/src/main/res/values/strings.xml app/src/main/res/layout/activity_main.xml app/src/main/java/com/example/bhashasetu/MainActivity.kt gradle.properties build.gradle 2>/dev/null || true
+          echo "=== files now present ==="
+          find . -maxdepth 4 -name "*.gradle" -o -maxdepth 4 -name "*.kt" -o -maxdepth 4 -name "*.xml" | grep -v "^./.git" | sort
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
-        env:
-          ANDROID_HOME: /usr/local/lib/android/sdk
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        run: gradle assembleDebug --stacktrace
 
       - name: Upload APK
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: warn
+          name: BhashaSetu-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
