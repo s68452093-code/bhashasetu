@@ -37,26 +37,22 @@ jobs:
           printf '%s\n' \
           'plugins {' \
           "    id 'com.android.application' version '8.5.2' apply false" \
-          "    id 'org.jetbrains.kotlin.android' version '1.9.24' apply false" \
           '}' > build.gradle
           printf '%s\n' \
           'org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=384m -Dfile.encoding=UTF-8' \
-          'org.gradle.parallel=false' \
-          'android.useAndroidX=true' > gradle.properties
+          'org.gradle.parallel=false' > gradle.properties
           printf '%s\n' \
-          "plugins { id 'com.android.application'; id 'org.jetbrains.kotlin.android' }" \
+          "plugins { id 'com.android.application' }" \
           'android {' \
           "    namespace 'com.example.bhashasetu'" \
           '    compileSdk 34' \
           '    defaultConfig { applicationId "com.example.bhashasetu"; minSdk 24; targetSdk 34; versionCode 1; versionName "1.0" }' \
           '    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }' \
-          "    kotlinOptions { jvmTarget = '17' }" \
-          '}' \
-          'dependencies { implementation "androidx.appcompat:appcompat:1.7.0" }' > app/build.gradle
+          '}' > app/build.gradle
           printf '%s\n' \
           '<?xml version="1.0" encoding="utf-8"?>' \
           '<manifest xmlns:android="http://schemas.android.com/apk/res/android">' \
-          '    <application android:label="BhashaSetu" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">' \
+          '    <application android:label="BhashaSetu">' \
           '        <activity android:name=".MainActivity" android:exported="true">' \
           '            <intent-filter>' \
           '                <action android:name="android.intent.action.MAIN" />' \
@@ -66,22 +62,32 @@ jobs:
           '    </application>' \
           '</manifest>' > app/src/main/AndroidManifest.xml
           printf '%s\n' \
-          'package com.example.bhashasetu' \
+          'package com.example.bhashasetu;' \
           '' \
-          'import android.os.Bundle' \
-          'import android.widget.TextView' \
-          'import androidx.appcompat.app.AppCompatActivity' \
+          'import android.app.Activity;' \
+          'import android.os.Bundle;' \
+          'import android.widget.LinearLayout;' \
+          'import android.widget.TextView;' \
           '' \
-          'class MainActivity : AppCompatActivity() {' \
-          '    override fun onCreate(savedInstanceState: Bundle?) {' \
-          '        super.onCreate(savedInstanceState)' \
-          '        val view = TextView(this)' \
-          '        view.text = "BhashaSetu"' \
-          '        view.textSize = 22f' \
-          '        setContentView(view)' \
+          'public class MainActivity extends Activity {' \
+          '    @Override' \
+          '    protected void onCreate(Bundle savedInstanceState) {' \
+          '        super.onCreate(savedInstanceState);' \
+          '        LinearLayout layout = new LinearLayout(this);' \
+          '        layout.setOrientation(LinearLayout.VERTICAL);' \
+          '        layout.setPadding(48, 96, 48, 48);' \
+          '        TextView title = new TextView(this);' \
+          '        title.setTextSize(28f);' \
+          '        title.setText("BhashaSetu");' \
+          '        TextView sub = new TextView(this);' \
+          '        sub.setTextSize(16f);' \
+          '        sub.setText("A bridge between sign and speech");' \
+          '        layout.addView(title);' \
+          '        layout.addView(sub);' \
+          '        setContentView(layout);' \
           '    }' \
-          '}' > app/src/main/java/com/example/bhashasetu/MainActivity.kt
-          find . -name "*.gradle" -o -name "*.kt" -o -name "*.xml" | sort
+          '}' > app/src/main/java/com/example/bhashasetu/MainActivity.java
+          echo "created:"; find . -name "*.gradle" -o -name "*.java" -o -name "AndroidManifest.xml" | sort
 
       - name: Build
         run: gradle assembleDebug --stacktrace
