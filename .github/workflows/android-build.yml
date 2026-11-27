@@ -89,8 +89,27 @@ jobs:
           '}' > app/src/main/java/com/example/bhashasetu/MainActivity.java
           echo "created:"; find . -name "*.gradle" -o -name "*.java" -o -name "AndroidManifest.xml" | sort
 
+      # Build with the log captured, so the cause is printed instead of buried
+      # 300 lines up. The Summary tab of the run shows it without any scrolling.
       - name: Build
-        run: gradle assembleDebug --stacktrace
+        run: |
+          set +e
+          gradle assembleDebug --stacktrace --console=plain > build.log 2>&1
+          code=$?
+          echo "gradle exit code: $code"
+          if [ $code -ne 0 ]; then
+            echo "================ FIRST ERRORS ================"
+            grep -n -E "What went wrong|Caused by:|error:|> Task .* FAILED|Execution failed|FAILURE:|Unresolved reference|Could not (find|resolve|download|open|create)" build.log | head -30
+            echo "================ LAST 25 LINES ================"
+            tail -25 build.log
+            {
+              echo "### Build failed — cause"
+              echo '```'
+              grep -E "What went wrong|Caused by:|error:|> Task .* FAILED|Execution failed for|FAILURE:|Unresolved reference|Could not (find|resolve|download|open|create)" build.log | head -25
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
 
       - name: Upload APK
         if: success()
@@ -98,3 +117,11 @@ jobs:
         with:
           name: BhashaSetu-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
