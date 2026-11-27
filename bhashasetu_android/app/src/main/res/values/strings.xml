@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BhashaSetu</string>
+    <string name="tagline">A bridge between sign and speech</string>
+    <string name="placeholder_note">Both workflows are wired up in later steps: Sign → Text reads your camera, Text → Sign plays the avatar in-app.</string>
+    <string name="placeholder_button">Scaffold is running</string>
+    <string name="placeholder_toast">BhashaSetu is set up correctly.</string>
+</resources>
