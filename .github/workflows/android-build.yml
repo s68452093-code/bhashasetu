@@ -12,8 +12,6 @@ jobs:
     timeout-minutes: 30
 
     env:
-      # ubuntu-latest ships the Android SDK here; setup-android is not needed
-      # and its runtime download is a common failure point.
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
@@ -21,7 +19,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # AGP 8.5.2 needs JDK 17. A wrong JDK dies in ~5s with only a daemon trace.
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -48,15 +45,24 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
+          gradle-version: '8.7'
           cache-read-only: false
 
       - name: Show toolchain versions
         run: |
           java -version
-          ./gradlew --version
+          chmod +x ./gradlew 2>/dev/null || true
+          if [ -x ./gradlew ]; then ./gradlew --version; else gradle --version; fi
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          chmod +x ./gradlew 2>/dev/null || true
+          if [ -x ./gradlew ]; then
+            ./gradlew assembleDebug --stacktrace
+          else
+            echo "::warning::gradle wrapper not found, using gradle 8.7 from setup-gradle"
+            gradle assembleDebug --stacktrace
+          fi
 
       - name: Upload APK
         if: success()
