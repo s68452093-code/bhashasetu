@@ -1,0 +1,62 @@
+ISL MODEL TRAINING - 2026-11-27 15:53
+Recordings: 44 signs, 27540 samples
+  A 300 (5 rounds)   B 300 (5 rounds)   C 480 (8 rounds)   D 600 (10 rounds)   E 960 (16 rounds)   F 660 (11 rounds)   G 600 (10 rounds)   H 600 (10 rounds)   I 600 (10 rounds)   J 420 (7 rounds)   K 960 (16 rounds)   L 600 (10 rounds)   M 600 (10 rounds)   N 900 (15 rounds)   O 600 (10 rounds)   P 600 (10 rounds)   Q 900 (15 rounds)   R 900 (15 rounds)   S 300 (5 rounds)   T 900 (15 rounds)   U 300 (5 rounds)   V 900 (15 rounds)   W 960 (16 rounds)   WORD_AGAIN 600 (10 rounds)   WORD_FOOD 600 (10 rounds)   WORD_GIVE 600 (10 rounds)   WORD_HELLO 600 (10 rounds)   WORD_HELP 600 (10 rounds)   WORD_I 480 (8 rounds)   WORD_MORE 900 (15 rounds)   WORD_NEED 600 (10 rounds)   WORD_NO 600 (10 rounds)   WORD_PLEASE 600 (10 rounds)   WORD_SORRY 600 (10 rounds)   WORD_THANK YOU 600 (10 rounds)   WORD_WANT 600 (10 rounds)   WORD_WATER 600 (10 rounds)   WORD_WHAT 600 (10 rounds)   WORD_WHERE 600 (10 rounds)   WORD_YES 600 (10 rounds)   WORD_YOU 600 (10 rounds)   X 420 (7 rounds)   Y 300 (5 rounds)   Z 900 (15 rounds)
+
+Testing each recording round with a model that never saw it:
+  Random forest   49.8 %
+  SVM             50.6 %
+Keeping: SVM
+
+Signs, weakest first:
+  N    23.8 %   mixed up with  (67 %)
+  R    25.1 %   mixed up with  (67 %)
+  Q    26.7 %   mixed up with  (67 %)
+  W    30.4 %   mixed up with  (69 %)
+  E    31.1 %   mixed up with  (69 %)
+  K    31.2 %   mixed up with  (69 %)
+  WORD_MORE  31.3 %   mixed up with  (67 %)
+  Z    32.1 %   mixed up with  (67 %)
+  T    33.0 %   mixed up with  (67 %)
+  V    33.3 %   mixed up with  (67 %)
+  WORD_FOOD  38.3 %   mixed up with  (50 %)
+  WORD_WHERE  41.7 %   mixed up with  (50 %)
+  WORD_NEED  41.8 %   mixed up with  (50 %)
+  WORD_WANT  42.5 %   mixed up with  (50 %)
+  F    44.4 %   mixed up with  (55 %)
+  WORD_PLEASE  45.2 %   mixed up with  (50 %)
+  WORD_HELP  47.8 %   mixed up with  (50 %)
+  WORD_WATER  47.8 %   mixed up with  (50 %)
+  I    48.7 %   mixed up with  (50 %)
+  WORD_WHAT  48.7 %   mixed up with  (50 %)
+  WORD_AGAIN  49.0 %   mixed up with  (50 %)
+  WORD_NO  49.2 %   mixed up with  (50 %)
+  M    49.3 %   mixed up with  (50 %)
+  WORD_GIVE  49.3 %   mixed up with  (50 %)
+  WORD_SORRY  49.5 %   mixed up with  (50 %)
+  H    49.7 %   mixed up with  (50 %)
+  WORD_HELLO  49.7 %   mixed up with  (50 %)
+  O    49.8 %   mixed up with  (50 %)
+  WORD_YES  49.8 %   mixed up with  (50 %)
+  D    50.0 %   mixed up with  (50 %)
+  G    50.0 %   mixed up with  (50 %)
+  L    50.0 %   mixed up with  (50 %)
+  P    50.0 %   mixed up with  (50 %)
+  WORD_THANK YOU  50.0 %   mixed up with  (50 %)
+  WORD_YOU  50.0 %   mixed up with  (50 %)
+  X    54.3 %   mixed up with  (29 %)
+  C    60.8 %   mixed up with  (38 %)
+  WORD_I  62.3 %   mixed up with  (38 %)
+  J    71.4 %   mixed up with  (29 %)
+  Y    93.7 %   mixed up with U (3 %)
+  S    96.7 %   mixed up with WORD_AGAIN (3 %)
+  B    97.7 %   mixed up with WORD_NEED (1 %)
+  A    98.7 %   mixed up with WORD_HELP (1 %)
+  U    99.3 %   mixed up with WORD_MORE (1 %)
+
+To improve the weaker classes, record them again in collect_data.py:
+  SIGNS_TO_RECORD = "CDEFGHIJKLMNOPQRTVWXZ"
+  WORDS_TO_RECORD = ['AGAIN', 'FOOD', 'GIVE', 'HELLO', 'HELP', 'I', 'MORE', 'NEED', 'NO', 'PLEASE', 'SORRY', 'THANK YOU', 'WANT', 'WATER', 'WHAT', 'WHERE', 'YES', 'YOU']
+Keep hands, face and upper body visible, then run train_model.py again.
+
+Saved D:\SCOUT FILE IMAGES\isl_alphabet_model_v3.pkl  (128 s)
+Run checking regional.py to use it.

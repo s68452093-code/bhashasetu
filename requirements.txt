@@ -1,0 +1,8 @@
+PySide6==6.12.0
+PySide6-WebEngine
+opencv-python
+mediapipe
+scikit-learn
+pandas
+numpy
+joblib
